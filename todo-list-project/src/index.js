@@ -1,4 +1,6 @@
-import HelloSuperhero from "./HelloSuperhero";
 
-/* Leftover from Chpater 1. No longer needed */
-// document.body.appendChild( HelloSuperhero("Superman") );
+import { VDOM } from './VirtualDom';
+import TodoApp from './TodoApp';
+
+document.body.innerHTML = '<div id="root"></div>';
+VDOM.mount('root', TodoApp);
