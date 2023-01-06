@@ -18,7 +18,7 @@
     cursor: pointer;
 }
 
-.TodoListItem: hover {
+.TodoListItem:hover {
     background: #eee;
 }
 
