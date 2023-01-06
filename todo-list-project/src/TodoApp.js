@@ -3,6 +3,7 @@ import { TodoList } from './TodoList';
 import { TodoListItemCreator } from './TodoListItemCreator';
 import { VDOM } from './VirtualDom'
 import './TodoApp.css';
+import v from './v';
 
 const todoItems = [
     {complete: true, text: "This is complete"},
@@ -21,11 +22,11 @@ const updateItem = (i, item) => {
 }
 
 function TodoApp() {
-    const div = document.createElement('div');
-    div.className = 'TodoApp';
-    div.appendChild(TodoListItemCreator(addItem));
-    div.appendChild(TodoList(todoItems, updateItem));
-    return div;
+    const app = v('div', {className: 'TodoApp'});
+    app.add(TodoListItemCreator(addItem));
+    app.add(TodoList(todoItems, updateItem));
+
+    return app;
 }
 
 export default TodoApp;

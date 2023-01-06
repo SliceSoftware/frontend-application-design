@@ -1,5 +1,6 @@
 import checked from './assets/checked.png';
 import unchecked from './assets/unchecked.png'
+import v from './v';
 
 /**
  * Returns an HTMLElement representing a todo list item.
@@ -8,14 +9,22 @@ import unchecked from './assets/unchecked.png'
  * @param item.text A string for the todo item text to display
  */
 export function TodoListItem(item) {
-    const div = document.createElement('div');
-    const image = `<img src="${item.complete ? checked : unchecked}" width="20" height="20" />`;
-    div.innerHTML = `
-        ${image} ${item.text}
-    `;
-    div.addEventListener('click', (ev) => {
-        item.toggleComplete();
+
+    const div = v('div', {
+        className: "TodoListItem",
+        onclick:(ev) => {
+            item.toggleComplete();
+        }
+    });
+
+    const image = v('img', {
+        width: 20,
+        height: 20,
+        src: item.complete ? checked : unchecked
     })
-    div.className = 'TodoListItem';
+    
+    div.add(image);
+    div.add(item.text);
+    
     return div;
 }

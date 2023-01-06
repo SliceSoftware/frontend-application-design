@@ -1,15 +1,20 @@
 import { TodoListItem } from './TodoListItem';
+import v from './v';
 
 export function TodoList(todoItems, updateItem) {
-    const div = document.createElement('div');
+
+    const list = v('div', {
+        className: 'TodoList', 
+    })
+
     for(let i = 0; i < todoItems.length; i++) {
         const item = todoItems[i];
         item.toggleComplete = () => {
             item.complete = !item.complete;
             updateItem(i, item);
         }
-        div.className = 'TodoList';
-        div.appendChild(TodoListItem(item));
+        
+        list.add(TodoListItem(item));
     }
-    return div;
+    return list;
 }
