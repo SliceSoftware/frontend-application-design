@@ -1,0 +1,109 @@
+const express = require('express')
+const app = express()
+const port = 3000
+
+class TodoList {
+    
+    constructor(name, id) {
+        this.name = name;
+        this.items = [];
+        this.id = id;
+    }
+
+    addItem(text) {
+        const item = {text, complete: false, id: this.items.length};
+        this.items.push(item)
+        return item;
+    }
+    
+    updateItem(i, text, complete) {
+        if (i >= 0 && i < this.items.length) {
+            const item = {text, complete, id: i};
+            this.items[i] = item;
+            return item;
+        }
+        return false;
+    }
+
+    toJson() {
+        return JSON.stringify({name: this.name,id: this.id, items: this.items});
+    }
+}
+
+const error = (message) => {error: message};
+const notFound = error("Requested item not found");
+
+// List of Todo Lists
+// const lists = [new TodoList("Grocery List", 0)];
+const lists = [];
+
+app.use(express.json());
+
+app.get('/lists', (req, res) => {
+    res.send(lists.map((l, i) =>  {return {id: i, name: l.name}}) );
+})
+
+app.post('/lists', (req, res) => {
+    const data = req.body;
+    if (data.name) {
+        const newList = new TodoList(data.name, lists.length);
+        lists.push(newList);
+        res.send(data);
+    } else {
+        res.status(400);
+        res.send(error("'name' is required"))
+    }
+})
+
+app.get('/lists/:id', (req, res) => {
+    const listId = req.params.id;
+    if (listId < 0 || listId > lists.length-1) {
+        res.status(404).send(notFound);
+    } else {
+        res.send(lists[listId].toJson());
+    }
+})
+
+app.post('/lists/:id/items', (req, res) => {
+    const listId = req.params.id;
+    if (listId < 0 || listId > lists.length-1) {
+        res.status(404).send(notFound);
+    } else {
+        const data = req.body;
+        if (! data.text) {
+            res.status(400).send(error( "text is required"));
+        } else {
+            const item = lists[listId].addItem(data.text);
+            res.send(item);
+        }
+    }
+})
+
+app.post('/lists/:id/items/:itemId', (req, res) => {
+    const listId = req.params.id;
+    const itemId = req.params.itemId;
+
+    if (listId < 0 || listId > lists.length-1) {
+        res.status(404).send(notFound);
+    } else if (itemId < 0 || itemId > lists[listId].items.length - 1) {
+        res.status(404).send(notFound);
+    } else {
+        const data = req.body;
+        if (! (data.text) ) {
+            res.status(400).send(error( "'text' are required"))
+        } else {
+            const item = lists[listId].updateItem(itemId, data.text, data.complete);
+            if (item) {
+                res.send(item);
+            } else {
+                res.status(500);
+                res.send(error("Unable to update item"));
+            }
+        }
+
+    }
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`)
+})
