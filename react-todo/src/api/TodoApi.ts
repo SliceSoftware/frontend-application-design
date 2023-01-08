@@ -30,7 +30,7 @@ const TodoApi = {
     },
 
     updateItem: async (listId : number, item : TodoItem ) : Promise<TodoItem> => {
-        if (! item.id) {
+        if (typeof(item.id) != 'number') {
             throw new Error("TodoItem must have an 'id' property in order to update it.")
         }
         const response = await axiosInstance.post(`/lists/${listId}/items/${item.id}`, item.toServerObject());
