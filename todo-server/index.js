@@ -12,15 +12,17 @@ class TodoList {
     }
 
     addItem(text) {
-        const item = {text, status: "INCOMPLETE", id: this.items.length};
+        const item = {text, status: "INCOMPLETE", id: (this.items.length + 1)};
         this.items.push(item)
         return item;
     }
     
-    updateItem(i, text, status) {
-        if (i >= 0 && i < this.items.length) {
-            const item = {text, status, id: i};
-            this.items[i] = item;
+    updateItem(id, text, status) {
+        
+        const index = this.items.findIndex(x => x.id == id)
+        if (index >= 0) {
+            const item = {text, status, id};
+            this.items[index] = item;
             return item;
         }
         return false;
@@ -42,7 +44,7 @@ lists[0].addItem("Apples");
 lists[0].addItem("Eggs");
 lists[1].addItem("Laundry");
 lists[1].addItem("Water Plants");
-lists[0].updateItem(0, "Apples", "COMPLETE");
+lists[0].updateItem(1, "Apples", "COMPLETE");
 // const lists = [];
 
 app.use(express.json());
@@ -89,12 +91,12 @@ app.post('/lists/:id/items', (req, res) => {
 })
 
 app.post('/lists/:id/items/:itemId', (req, res) => {
-    const listId = req.params.id;
-    const itemId = req.params.itemId;
+    const listId = Number(req.params.id);
+    const itemId = Number(req.params.itemId);
 
     if (listId < 0 || listId > lists.length-1) {
         res.status(404).send(notFound);
-    } else if (itemId < 0 || itemId > lists[listId].items.length - 1) {
+    } else if (itemId < 0 || itemId > lists[listId].items.length) {
         res.status(404).send(notFound);
     } else {
         const data = req.body;
