@@ -1,7 +1,7 @@
 import TodoItem from "./TodoItem";
 import TodoList from './TodoList';
 import {describe, it, expect} from 'vitest';
-import { EXT_TodoItem } from "../api/TodoApi";
+import { EXT_TodoItem } from "../api/TodoApi.d";
 
 describe("A TodoList", () => {
 
