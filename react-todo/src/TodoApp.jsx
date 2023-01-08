@@ -1,6 +1,7 @@
 import React from 'react';
 import MainLayout from './layout/MainLayout';
 import TodoListView from './views/TodoListView';
+import './TodoApp.css';
 
 const TodoApp = () => {
     return (<MainLayout>
