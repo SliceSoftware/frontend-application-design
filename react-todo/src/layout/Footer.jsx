@@ -1,18 +1,21 @@
 import React from 'react';
 
+/* Material Imports */
+import { Typography } from '@mui/material';
+
 const Footer = () => {
     return (
-        <div style={{
-            position: 'absolute',
-            left: 0,
-            right: 0,
-            bottom: 0,
-            height: '100px',
-            backgroundColor: 'aqua',
-            border: '1px solid black'
-        }}>
-            <h1>Footer</h1>
-        </div>
+        <Typography 
+            variant="caption"
+            component="div"
+            sx={{
+                position: 'absolute',
+                bottom: 0,
+                margin: 1
+
+            }}>
+                Frontend Application Design 2023
+        </Typography>
     )
 }
 
