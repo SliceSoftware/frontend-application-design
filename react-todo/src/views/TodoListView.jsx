@@ -31,6 +31,12 @@ const TodoListView = ({listId}) => {
         }
     }
 
+    const toggleItemComplete = async (item) => {
+        item.toggleComplete();
+        await TodoApi.updateItem(listId, item);
+        refreshList();
+    }
+
     return (
     <Paper sx={{marginX: 15, marginY: 5, minWidth: 250}} elevation={2}>
         {/* List is not defined */}
@@ -50,7 +56,7 @@ const TodoListView = ({listId}) => {
                 autoFocus />
         </Tooltip>
 
-        {list && list.items?.map(i => <TodoListItemView key={`listitem-${i.id}`} item={i} />)}
+        {list && list.items?.map(i => <TodoListItemView key={`listitem-${i.id}`} item={i} toggleItemComplete={() => toggleItemComplete(i)} />)}
     </Paper>
     )
 }
