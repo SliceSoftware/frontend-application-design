@@ -9,6 +9,7 @@ import { TextField } from '@mui/material';
 import { Tooltip } from '@mui/material';
 /* UI Imports */
 import ListTitle from './ListTitle';
+import TodoListItemView from './TodoListItemView';
 
 const TodoListView = ({listId}) => {
 
@@ -31,7 +32,7 @@ const TodoListView = ({listId}) => {
     }
 
     return (
-    <Paper sx={{marginX: 15, marginY: 5, minWidth: 250, minHeight: 500}} elevation={2}>
+    <Paper sx={{marginX: 15, marginY: 5, minWidth: 250}} elevation={2}>
         {/* List is not defined */}
         {!list && <ListTitle>"No List Selected"</ListTitle>}
 
@@ -48,6 +49,8 @@ const TodoListView = ({listId}) => {
                 sx={{width:'95%', marginTop: '8px', padding: '4px 4px 4px p4x'}}
                 autoFocus />
         </Tooltip>
+
+        {list && list.items?.map(i => <TodoListItemView key={`listitem-${i.id}`} item={i} />)}
     </Paper>
     )
 }
