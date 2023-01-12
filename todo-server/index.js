@@ -36,7 +36,7 @@ const notFound = error("Requested item not found");
 
 // List of Todo Lists
 const lists = [new TodoList("Grocery List", 0),
-                new TodoList("Weekend Chores", 0)];
+                new TodoList("Weekend Chores", 1)];
 
 lists[0].addItem("Apples");
 lists[0].addItem("Eggs");
