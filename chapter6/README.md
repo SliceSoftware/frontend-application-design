@@ -35,7 +35,8 @@ look and feel.
 
 ```sh
 > cd react-todo
-> npm install @mui/material  @mui/icons-material @emotion/styled
+> npm add @mui/material  @mui/icons-material @emotion/styled
+> npm install
 ```
 ### Start the Dev Server and Backend Server 
 
@@ -55,7 +56,7 @@ _ npm run start
 
 ### Update the Header
 
-The header uses the following Material componnets
+Replace the application header with an component that can host a menu, a brand, and an avatar.  In Material UI, this is called an `AppBar`.  Additionally, the header will make use of a `Toolbar` component and a `Typography` component.  Review the documentation for these components at the links below.
 
 * [AppBar](https://mui.com/material-ui/react-app-bar/)
 * [Toolbar](https://mui.com/material-ui/api/toolbar/)
@@ -83,10 +84,6 @@ a `Typography` component over native HTML tags is the `Typography` component sup
 material UI system properties such as `sx`
 
 
-Remove `place-items: center;` from the `body` section of `index.css`
-
-and add `width: 100%;` to TodoApp.css (Add to chapter6 branch )
-
 ### Update Footer
 
 Update `Footer.jsx` to return a `Typography` with absolute positioning at the bottom of the screen.
@@ -108,7 +105,7 @@ configured with the `elevation` property.  Update the outermost element of the `
 Use the `sx` property to add a large margin an set a minimum height and width. 
 
 ```js
-  <Paper sx={{marginX: 25, marginY: 5, minWidth: 500, minHeight: 500}} elevation={2}>
+  <Paper sx={{marginX: 15, marginY: 5, minWidth: 250}} elevation={2}>
 ```
 
 
@@ -118,29 +115,35 @@ Material provides a [`styled`](https://mui.com/system/styled/) function that can
 
 Create a new file named `src/views/ListTitle.jsx` that exports a  [styled](https://mui.com/system/styled/) component for the list name that uses a larger and fancier font with padding. 
 
-Add the following to `TodoListView.jsx` 
+Add the following to `ListTitle.jsx` 
 ```js
-const ListTItle = styled(Typography)({
+import { styled } from '@mui/system';
+import { Typography } from '@mui/material';
+
+const ListTitle = styled(Typography)({
     fontSize: 'x-large',
-    fontFamily: 'fantasy, cursive', 
+    fontFamily: 'fantasy, cursive',
     padding: 15,
-    margin: 0
+    margin: 0, 
+    textAlign: 'center'
 })
 
-export default ListTitle
+export default ListTitle;
 ```
 
-And replace the current tag used for the list name, an `<h2>`, with  `<ListName>`.
+Within `TodoListView` wrap both the list name and the "No List Selected" text in a  `<ListTitle>` tag.
 
 
 
 ### Modify `TodoListView` to Take a `listId` Property and Fetch the List From the Backend
 
-Until now the top level `TodoApp` component has passed a `TodoList` model to the `TodoListView`.  Continuing with this approach will add complexity when it comes time to adding and modifying list items, because the component that manages the state should also be the component that updates the state.  When it comes time to add and update items, if `TodoApp` continues to manages the list, then `TodoApp` will also need to pass down callbacks to add and update the list.  
+At the end of Chapter 4 the `TodoApp` component passed the object `{name: "Grocery List"}` to the `TodoListView`.  In Chapter 5, we introduced the data models and the API layer so now we can fetch data from the server and pass validated data to the component views.  
 
-Now, instead of passing a `TodoList` to `TodoListView`, pass the id of the list so that `TodoListView` can fetch the list from the backend and add or update items directly without resorting to callbacks. 
+When building a frontend application there is always a decision about where to manage data within the component hierarchy.  Generally wherever the data are stored, is where the functions to modify them also live.  (We will see an alternative approach in Chapter 8).  If the data are managed too high in the hierarchy, then it is cumbersome to pass both the data and the callbacks to modify the data down through multiple layers of components.  If the data are managed too low in the hierarchy, then there is share the data across related components.  
 
-Modify `TodoApp` to manage a `listId` variable using the `useState` hook, and pass that variable to `TodoListView`
+In this application, the `TodoListView` will accept the `id` of the list to display as a property, and then assume responsibility for fetching and storing the actual list.  
+
+Modify `TodoApp` to manage a `listId` variable using the `useState` hook, and pass that variable to `TodoListView` as below:
 
 ```js
 const TodoApp = () => {
@@ -170,7 +173,7 @@ const TodoListView = ({listId}) => {
     ...
 ```
 
-Now introduce a `useEffect` hook that will call a function `refresh()` that will fetch the list with `TodoApi.getList()` and call `setList()` with the result.  
+Now introduce a `useEffect` hook that will call an asynchronous function `refreshList()` that will fetch the list with `TodoApi.getList()` and call `setList()` with the result.  
 
 The `useEffect` takes two arguments, a function to execute, and a list of dependencies.  The function is called if any value in the list of dependencies changes.  
 
@@ -184,10 +187,66 @@ The following hook will update `list` whenever `listId` changes.
     }
 
     useEffect(() => {
-        refreshList();
-    }, [listId])
+        refreshList()
+    }, [listId]);
 ```
 
+The Application should now display the title for "Grocery List" which is one of the two lists already stored in the backend.  Check the http://localhost:3000/lists endpoint to confirm this, and change the default `listId` to 1 in `TodoApp` to confirm. 
+
+
+### Create a TodoListItemView component
+
+The application will use a Material UI [List](https://mui.com/material-ui/react-list/) to represent the items in the list. 
+
+Create `TodoListItemView.jsx` that takes a `TodoItem` as an argument.
+
+The `TodoListItemView` returns a Material UI `ListItem` that contains a `ListItemButton`, a `ListItemIcon`, and
+`ListItemText`. 
+
+You can use the icons selected in the code below, select different [icons](https://mui.com/material-ui/material-icons/) to suit your preference, or 
+create your own [SvgIcon](https://mui.com/material-ui/icons/#svgicon)
+
+```js
+import React from 'react';
+import {ListItem} from '@mui/material';
+import {ListItemButton} from '@mui/material';
+import {ListItemText}  from '@mui/material';
+import {ListItemIcon} from '@mui/material';
+
+// icons
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+
+const TodoListItemView = ({item}) => {
+
+    return (
+    <ListItem divider>
+        <ListItemButton>
+            <ListItemIcon>
+                {item.complete ? <TaskAltIcon /> : <RadioButtonUncheckedIcon />}
+            </ListItemIcon>
+            <ListItemText primary={item.text} />        
+        </ListItemButton>    
+    </ListItem>);
+}
+
+export default TodoListItemView;
+```
+
+### Add the list of items to `TodoListView`
+
+At the end of the `TodoListView` return statement use `map` to convert `list.items` into an array of `<TodoListItemView>` components.  Make sure to check that `list` is truthy prior to accessing its properties.
+
+The `map` function returns an array, and JSX requires that each element in an array contain a unique `key` prop.  
+The `key` prop is used by the React Fabric to compute when and how to render the DOM.  In this situation, 
+create a key by concatenating the string 'listitem-' with the id of the item.  
+
+```js
+  {/* List of Items */ }
+  <List spacing={1}>
+      {list && list.items?.map((i) => <TodoListItemView key={`listitem-${i.id}`} item={i}  />)}
+  </List>
+```
 ### Create an input component for adding new items
 
 The Material [TextField](https://mui.com/material-ui/react-text-field/) component is a handy extension to an html `<Input>` with built in support 
@@ -195,9 +254,9 @@ for helper text, error text, and labels.
 
 We can additionally wrap the `TextField` in a Material [Tooltip](https://mui.com/material-ui/react-tooltip/) for extra polish.
 
-Add a `Tooltip` with a `TextField` for adding new items.  Use the `outlined`, `filled`, or `standard` variant based on your preference.
+Add a `Tooltip` with a `TextField` in `TodoListView` below the list name.  Use the `outlined`, `filled`, or `standard` variant based on your preference.
 
-Include an `autofocus` property so that the component takes the focus when the List renders. 
+Include an `autoFocus` property so that the component takes the focus when the List renders. 
 
 ```js
 <Tooltip title="Type and press `Enter` to add a new item" arrow>
@@ -259,60 +318,6 @@ const TodoListView = ({listId, cancel}) => {
 }
 ```
 
-### Create a TodoListItemView component
-
-The application will use a Material UI [List](https://mui.com/material-ui/react-list/) to represent the items in the list. 
-
-Create `TodoListItemView.jsx` that takes a `TodoItem` as an argument.
-
-The `TodoListItemView` returns a Material UI `ListItem` that contains a `ListItemButton`, a `ListItemIcon`, and
-`ListItemText`. 
-
-You can use the icons selected in the code below, select different [icons](https://mui.com/material-ui/material-icons/) to suit your preference, or 
-create your own [SvgIcon](https://mui.com/material-ui/icons/#svgicon)
-
-```js
-import React from 'react';
-import {ListItem} from '@mui/material';
-import {ListItemButton} from '@mui/material';
-import {ListItemText}  from '@mui/material';
-import {ListItemIcon} from '@mui/material';
-
-// icons
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
-
-const TodoListItemView = ({item}) => {
-
-    return (
-    <ListItem divider>
-        <ListItemButton>
-            <ListItemIcon>
-                {item.complete ? <TaskAltIcon /> : <RadioButtonUncheckedIcon />}
-            </ListItemIcon>
-            <ListItemText primary={item.text} />        
-        </ListItemButton>    
-    </ListItem>);
-}
-
-export default TodoListItemView;
-```
-
-### Add the list of items to `TodoListView`
-
-At the end of the `TodoListView` return statement use `map` to convert `list.items` into an array of `<TodoListItemView>` components.  
-
-The `map` function returns an array, and JSX requires that each element in an array contain a unique `key` prop.  
-The `key` prop is used by the React Fabric to compute when and how to render the DOM.  In this situation, 
-create a key by concatenating the string 'listitem-' with the id of the item.  
-
-```js
-  {/* List of Items */ }
-  <List spacing={1}>
-      {list.items?.map((i) => <TodoListItemView key={`listitem-${i.id}`} item={i}  />)}
-  </List>
-```
-
 ### Pass a `toggleItemComplete` Function Down to `<TodoListItem>`
 
 Create a new function in `TodoListView` called `toggleItemComplete` that toggles the completion status of the item, and then invokes `TodoApi.updateItem`.  After the `updateItem` promise resolves, make sure to call `refreshList()`.
@@ -354,12 +359,14 @@ Create a new file `src/views/TodoListSelectionView.jsx` that defines a `TodoList
 accept a function named `selectList` as a property that accepts a `TodoList`. When called, it notifies the parent component, `<TodoApp>`, that a list was selected so that the list can be displayed.
 
 ```js
-const TodoListSelectionView = ({listSelected}) => {
+const TodoListSelectionView = ({selectList}) => {
     return ();
 }
 ```
 
 ### Fetch the `lists` with `useEffect`
+
+Inside the `ListSelectionView` we will use an effect hook to fetch all the lists and store them in a state variable named `lists`.
 
 Add a state variable that contains the TodoLists to display with the `useState` hook.  Default it to an empty array. 
 
@@ -369,7 +376,7 @@ const [lists, setLists] = useState([]);
 
 When `TodoListSelectionView` loads, it must fetch the lists from the backend so that the user can choose a list.  
 
-Add a `useEffect` hook with a `refreshLists` function that calls `TodoApi.allLists()`, passing the return value to `setLists()`. Pass an empty array as the dependency, which is a pattern used in React to ensure the effect is called one time after the component is first rendered   
+Create a new function `refreshLists()` that calls `TodoApi.allLists()` and passes the return value to `setLists()`.  Then add a `useEffect` hook that calls the`refreshLists` function  Pass an empty array as the dependency. This is a pattern used in React to ensure the effect is called one time after the component is first rendered   
 
 ```js
 const refreshLists = async () => {
@@ -381,27 +388,35 @@ useEffect(() => {refreshlists()}, []);
 
 ### Render Each List as a Button in a Grid 
 
-Use a [Grid](https://mui.com/material-ui/react-grid2/) to render a 
-button for each list using the `ListTitle`.  
+At this point, we have fetched the lists from the backend, so now we need a way to display them.  For this we will use a [Grid](https://mui.com/material-ui/react-grid2/) to render a 
+button for each list using the `ListTitle`.  Import `Grid` from `@mui/material/Unstable_Grid2` and display a button for each list if `lists` is defined or a message if `lists` is undefined.
 
 ```js
-    return (<Grid spacing={3} sx={{margin: 7}} container>
-        {lists.map(l => 
-            <Grid key={l.id} xs={12} sm={6} md={4}> 
-                <Button variant="contained" sx={{width: '100%'}} onClick={() => selectList(l)}>
-                    <ListTitle>{l.name}</ListTitle>
-                </Button>
-            </Grid>
-        )}
-    </Grid>);
+return (
+    <Grid spacing={3} sx={{margin: 7}} container>
+    {lists && lists.map(l => 
+        <Grid key={l.id} xs={12} sm={6} md={4}>
+            <Button variant="contained" sx={{width: "100%"}} onClick={() => selectList(l)}>
+                <ListTitle>{l.name}</ListTitle>
+            </Button>
+        </Grid>    
+    )}
+
+    {!lists && 
+        <Grid xs={12}>
+            <Typography variant="h2">No Lists Found</Typography>
+        </Grid>
+    }
+    </Grid>
+);
 ```
 
 The outer most `<Grid>` element, which includes a `container` property, defines the existence of the grid.  Within that grid 
-container are grid cells.  Grid rows are divided into 12 units, and 
+container are grid cells.  the `lists` array is mapped into a button for each grid cell, and the contents of the button is the `ListTitle`.  A button click invokes a closure that calls  `selectList()` with the current list.
+
+Grid rows are divided into 12 units, and 
 each cell can occupy from 1 to 12 units.  Furthermore, it is possible 
 to specify a different number of units for different screen sizes.  In the example above, for an extra small (`xs`) screen the grid cell will occupy the entire row - all 12 units.  A small (`sm`) screen will contain two grid cells of 6 units each, and a medium (`md`) screen or larger will contain three grid cells of 4 units each. 
-
-Within the grid, the `lists` array is mapped into a button for each grid cell, and the contents of the button is the `ListTitle`.  A button click invokes a closure that calls  `listSelected` with the current list.
 
 ### Add Logic to `TodoApp` to render either `TodoListSelectionView or `TodoListView`
 
@@ -412,7 +427,7 @@ Modify the returned JSX of `TodoApp` to render the correct component based on wh
 Wrap `setListId` in a function and pass it to `TodoListSelectionView` as the `selectList` property so that a button click will render the TodoList.
 
 ```js
-{listId == null && <TodoListSelectionView  listSelected={(list) => setListId(list.id))} /> }
+{listId == null && <TodoListSelectionView  selectList={(list) => setListId(list.id))} /> }
 {listId != null &&  <TodoListView listId={listId}  /> }
 ```
 At this point the application will display a list when it is selected.  However, there is no mechanism to return to the `ListSelectionView` once a list is selected.
@@ -475,7 +490,7 @@ Add a new Grid Cell at the bottom of the `TodoListSelectionView` Grid.  Within t
 
 When the 'Add List' Button is clicked, set `addingList` to `true`. 
 
-Create a `handleKeyUp` function that checks the event `code` and either calls `setAddingList(false)` if the user typed `'Escape'` or `TodoApi.addList(ev.target.value)` if the user typed `'Enter'`.  Do not forget to call `setAddingList(false)` and `refresh()` after adding the list.  
+Create a `handleKeyUp` function that checks the event `code` and either calls `setAddingList(false)` if the user typed `'Escape'` or `TodoApi.addList(ev.target.value)` if the user typed `'Enter'`.  Do not forget to call `setAddingList(false)` and `refreshLists()` after adding the list.  
 
 The code below sets the grid cell to consume 12 grid units so that the button and text field always appear below the grid items.  It also uses a [Floating Action Button](https://mui.com/material-ui/react-floating-action-button/) with an `<AddIcon />` and a `<Tooltip>` for a nicer UX.  
 
