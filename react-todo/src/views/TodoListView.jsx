@@ -7,11 +7,17 @@ import TodoApi from '../api/TodoApi';
 import { Paper } from '@mui/material';
 import { TextField } from '@mui/material';
 import { Tooltip } from '@mui/material';
+import { IconButton } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
+
 /* UI Imports */
 import ListTitle from './ListTitle';
 import TodoListItemView from './TodoListItemView';
 
-const TodoListView = ({listId}) => {
+/* Icons */
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+
+const TodoListView = ({listId, back}) => {
 
     const [list, setList] = useState(null);
 
@@ -39,11 +45,23 @@ const TodoListView = ({listId}) => {
 
     return (
     <Paper sx={{marginX: 15, marginY: 5, minWidth: 250}} elevation={2}>
-        {/* List is not defined */}
-        {!list && <ListTitle>"No List Selected"</ListTitle>}
+        <Grid container>
+            <Grid xs={2}>
+                <IconButton sx={{padding: 2}} onClick={back}>
+                    <ArrowBackIosIcon />
+                </IconButton>
+            </Grid>
+            <Grid xs={8}>
+                {/* List is not defined */}
+                {!list && <ListTitle>"No List Selected"</ListTitle>}
 
-        {/* List is defined */}
-        {list && <ListTitle>{list.name}</ListTitle>}
+                {/* List is defined */}
+                {list && <ListTitle>{list.name}</ListTitle>}
+            </Grid>
+            <Grid xs={2}>
+                {/* Empty, but exists to center list title */}
+            </Grid>
+        </Grid>
 
         {/* Input for adding items to list */}
         <Tooltip title="Type and press 'Enter' to add a new item" arrow>
